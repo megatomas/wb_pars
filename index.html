@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Парсинг Wildberries</title>
+    <title>Настройка парсинга Wildberries</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -13,240 +13,344 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            display: flex;
-            justify-content: center;
         }
 
         .container {
             max-width: 400px;
-            width: 100%;
+            margin: 0 auto;
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.6s ease-out;
         }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
             text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
             color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        label {
+        .form-group label {
             display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
             font-size: 14px;
-            color: #555;
-            margin-bottom: 5px;
         }
 
-        input[type="text"],
-        input[type="number"] {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
             font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .radio-group {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 15px;
+            margin-top: 8px;
         }
 
-        .radio-group label {
+        .radio-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
         }
 
-        .mode-info {
+        .radio-item:hover {
+            background-color: #f1f3f4;
+        }
+
+        .radio-item input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .conditional-field {
+            margin-top: 15px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .conditional-field.show {
+            opacity: 1;
+            max-height: 100px;
+        }
+
+        .info-card {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-card h3 {
+            color: #1976d2;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .info-card p {
+            color: #666;
             font-size: 14px;
-            color: #777;
-            margin-bottom: 15px;
+            line-height: 1.4;
         }
 
-        .field {
-            display: none;
-        }
-
-        .field.show {
-            display: block;
-        }
-
-        .submit-btn {
-            position: relative;
+        .btn {
             width: 100%;
-            padding: 12px;
-            background: #667eea;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .submit-btn:hover {
-            background: #5a67d8;
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
 
-        .submit-btn:disabled {
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .loading {
             display: none;
-            position: absolute;
-            top: 50%;
-            right: 10px;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            border: 2px solid #fff;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
         }
 
         .loading.show {
-            display: block;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff30;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
         }
 
         @keyframes spin {
-            to {
-                transform: translateY(-50%) rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .preview h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .preview-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .preview-item span:first-child {
+            color: #666;
+        }
+
+        .preview-item span:last-child {
+            color: #333;
+            font-weight: 600;
         }
 
         .error {
-            color: #e3342f;
+            color: #d32f2f;
             font-size: 14px;
-            margin-top: 10px;
+            margin-top: 5px;
             display: none;
-            text-align: center;
         }
 
         .error.show {
             display: block;
         }
 
-        .preview {
-            background: #f8f8f8;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+                border-radius: 15px;
+            }
 
-        .preview h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .preview-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .preview-row span:first-child {
-            color: #555;
-        }
-
-        .preview-row span:last-child {
-            color: #333;
-            font-weight: 500;
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Парсинг Wildberries!!!</h1>
+        <div class="header">
+            <h1>🚀 Настройка парсинга</h1>
+            <p>Настройте параметры для парсинга Wildberries</p>
+        </div>
+
         <form id="parsingForm">
             <div class="form-group">
-                <label for="sessionName">Название сессии</label>
-                <input type="text" id="sessionName" placeholder="Введите название сессии" required>
+                <label for="sessionName">📝 Название сессии:</label>
+                <input type="text" id="sessionName" name="sessionName" placeholder="Например: Парсинг лаков для ногтей" required>
             </div>
+
             <div class="form-group">
-                <label>Режим парсинга</label>
+                <label>🎯 Режим парсинга:</label>
                 <div class="radio-group">
-                    <label>
-                        <input type="radio" name="mode" id="mode1" value="1" checked>
-                        Главная страница
-                    </label>
-                    <label>
-                        <input type="radio" name="mode" id="mode2" value="2">
-                        Поиск по запросу
-                    </label>
-                </div>
-                <div class="mode-info" id="modeInfo">
-                    Парсинг товаров с главной страницы Wildberries с заданным количеством прокруток.
+                    <div class="radio-item">
+                        <input type="radio" id="mode1" name="mode" value="1" checked>
+                        <label for="mode1">Главная страница</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="mode2" name="mode" value="2">
+                        <label for="mode2">Поиск по запросу</label>
+                    </div>
                 </div>
             </div>
-            <div class="form-group field" id="searchField">
-                <label for="searchQuery">Поисковый запрос</label>
-                <input type="text" id="searchQuery" placeholder="Введите запрос">
+
+            <div id="searchField" class="conditional-field">
+                <div class="form-group">
+                    <label for="searchQuery">🔍 Поисковый запрос:</label>
+                    <input type="text" id="searchQuery" name="searchQuery" placeholder="лак для ногтей">
+                </div>
             </div>
-            <div class="form-group field show" id="scrollsField">
-                <label for="scrolls">Количество прокруток (1-50)</label>
-                <input type="number" id="scrolls" min="1" max="50" value="1">
+
+            <div id="scrollsField" class="conditional-field show">
+                <div class="form-group">
+                    <label for="scrolls">📜 Количество прокруток:</label>
+                    <input type="number" id="scrolls" name="scrolls" value="5" min="1" max="50">
+                </div>
             </div>
-            <div class="form-group field" id="pagesField">
-                <label for="pages">Количество страниц (1-20)</label>
-                <input type="number" id="pages" min="1" max="20" value="1">
+
+            <div id="pagesField" class="conditional-field">
+                <div class="form-group">
+                    <label for="pages">📄 Количество страниц:</label>
+                    <input type="number" id="pages" name="pages" value="2" min="1" max="20">
+                </div>
             </div>
+
             <div class="form-group">
-                <label for="minReviews">Минимум отзывов (1-10000)</label>
-                <input type="number" id="minReviews" min="1" max="10000" value="1">
+                <label for="minReviews">⭐ Минимум отзывов:</label>
+                <input type="number" id="minReviews" name="minReviews" value="100" min="1" max="10000">
             </div>
-            <button type="submit" id="submitBtn" class="submit-btn">
+
+            <div class="info-card">
+                <h3>ℹ️ Информация</h3>
+                <p id="modeInfo">Парсинг товаров с главной страницы Wildberries с заданным количеством прокруток.</p>
+            </div>
+
+            <div class="preview">
+                <h3>👁️ Предпросмотр настроек</h3>
+                <div class="preview-item">
+                    <span>Режим:</span>
+                    <span id="previewMode">Главная страница</span>
+                </div>
+                <div class="preview-item" id="previewQueryRow" style="display: none;">
+                    <span>Запрос:</span>
+                    <span id="previewQuery">-</span>
+                </div>
+                <div class="preview-item" id="previewScrollsRow">
+                    <span>Прокрутки:</span>
+                    <span id="previewScrolls">5</span>
+                </div>
+                <div class="preview-item" id="previewPagesRow" style="display: none;">
+                    <span>Страницы:</span>
+                    <span id="previewPages">2</span>
+                </div>
+                <div class="preview-item">
+                    <span>Мин. отзывов:</span>
+                    <span id="previewReviews">100</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                <span class="loading" id="loading"></span>
                 <span id="btnText">Запустить парсинг</span>
-                <span id="loading" class="loading"></span>
             </button>
+
             <div class="error" id="errorMessage"></div>
         </form>
-        <div class="preview">
-            <h3>Предпросмотр параметров</h3>
-            <div class="preview-row">
-                <span>Режим:</span>
-                <span id="previewMode">Главная страница</span>
-            </div>
-            <div class="preview-row" id="previewQueryRow" style="display: none;">
-                <span>Запрос:</span>
-                <span id="previewQuery">-</span>
-            </div>
-            <div class="preview-row" id="previewScrollsRow">
-                <span>Прокрутки:</span>
-                <span id="previewScrolls">1</span>
-            </div>
-            <div class="preview-row" id="previewPagesRow" style="display: none;">
-                <span>Страницы:</span>
-                <span id="previewPages">1</span>
-            </div>
-            <div class="preview-row">
-                <span>Мин. отзывов:</span>
-                <span id="previewReviews">1</span>
-            </div>
-        </div>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
 
+        // Элементы формы
         const form = document.getElementById('parsingForm');
         const mode1 = document.getElementById('mode1');
         const mode2 = document.getElementById('mode2');
@@ -259,6 +363,7 @@
         const btnText = document.getElementById('btnText');
         const errorMessage = document.getElementById('errorMessage');
 
+        // Элементы предпросмотра
         const previewMode = document.getElementById('previewMode');
         const previewQuery = document.getElementById('previewQuery');
         const previewScrolls = document.getElementById('previewScrolls');
@@ -268,8 +373,8 @@
         const previewScrollsRow = document.getElementById('previewScrollsRow');
         const previewPagesRow = document.getElementById('previewPagesRow');
 
+        // Обработчики изменения режима
         mode1.addEventListener('change', function() {
-            console.log("Выбран режим: Главная страница");
             if (this.checked) {
                 searchField.classList.remove('show');
                 pagesField.classList.remove('show');
@@ -280,7 +385,6 @@
         });
 
         mode2.addEventListener('change', function() {
-            console.log("Выбран режим: Поиск по запросу");
             if (this.checked) {
                 searchField.classList.add('show');
                 pagesField.classList.add('show');
@@ -290,6 +394,7 @@
             }
         });
 
+        // Обработчики для обновления предпросмотра
         document.getElementById('sessionName').addEventListener('input', updatePreview);
         document.getElementById('searchQuery').addEventListener('input', updatePreview);
         document.getElementById('scrolls').addEventListener('input', updatePreview);
@@ -304,27 +409,25 @@
             const pages = document.getElementById('pages').value;
             const minReviews = document.getElementById('minReviews').value;
 
-            console.log("Обновление предпросмотра:", { mode, sessionName, searchQuery, scrolls, pages, minReviews });
-
             if (mode === '1') {
                 previewMode.textContent = 'Главная страница';
                 previewQueryRow.style.display = 'none';
                 previewScrollsRow.style.display = 'flex';
                 previewPagesRow.style.display = 'none';
-                previewScrolls.textContent = scrolls || '-';
+                previewScrolls.textContent = scrolls;
             } else {
                 previewMode.textContent = 'Поиск по запросу';
                 previewQueryRow.style.display = 'flex';
                 previewScrollsRow.style.display = 'none';
                 previewPagesRow.style.display = 'flex';
                 previewQuery.textContent = searchQuery || '-';
-                previewPages.textContent = pages || '-';
+                previewPages.textContent = pages;
             }
-            previewReviews.textContent = minReviews || '-';
+
+            previewReviews.textContent = minReviews;
         }
 
         function showError(message) {
-            console.log('Ошибка:', message);
             errorMessage.textContent = message;
             errorMessage.classList.add('show');
             setTimeout(() => {
@@ -340,38 +443,48 @@
             const pages = parseInt(document.getElementById('pages').value);
             const minReviews = parseInt(document.getElementById('minReviews').value);
 
-            console.log("Валидация формы:", { sessionName, mode, searchQuery, scrolls, pages, minReviews });
-
             if (!sessionName) {
                 showError('Укажите название сессии');
                 return false;
             }
+
             if (mode === '2' && !searchQuery) {
                 showError('Для режима поиска укажите поисковый запрос');
                 return false;
             }
+
             if (mode === '1' && (scrolls < 1 || scrolls > 50)) {
                 showError('Количество прокруток должно быть от 1 до 50');
                 return false;
             }
+
             if (mode === '2' && (pages < 1 || pages > 20)) {
                 showError('Количество страниц должно быть от 1 до 20');
                 return false;
             }
+
             if (minReviews < 1 || minReviews > 10000) {
                 showError('Минимум отзывов должно быть от 1 до 10000');
                 return false;
             }
+
             return true;
         }
 
+        // Обработчик отправки формы
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            console.log('Форма отправлена');
+
             if (!validateForm()) {
-                console.log('Валидация не пройдена');
                 return;
             }
+
+            // Показываем загрузку
+            loading.classList.add('show');
+            btnText.textContent = 'Отправка...';
+            submitBtn.disabled = true;
+
+            // Собираем данные формы
             const formData = {
                 session_name: document.getElementById('sessionName').value.trim(),
                 mode: parseInt(document.querySelector('input[name="mode"]:checked').value),
@@ -380,47 +493,67 @@
                 pages: parseInt(document.getElementById('pages').value),
                 min_reviews: parseInt(document.getElementById('minReviews').value)
             };
-            console.log('Отправляемые данные:', formData);
-            console.log('Telegram WebApp:', window.Telegram?.WebApp);
-            if (!window.Telegram?.WebApp) {
-                console.error('Telegram WebApp не инициализирован');
-                showError('Ошибка: Telegram Web App не инициализирован');
-                return;
-            }
+
+            // Отправляем данные через Telegram WebApp
             try {
-                const jsonData = JSON.stringify(formData);
-                console.log('JSON для отправки:', jsonData);
-                tg.sendData(jsonData);
-                console.log('Данные успешно отправлены в Telegram');
-                loading.classList.add('show');
-                btnText.textContent = 'Отправка...';
-                submitBtn.disabled = true;
+                tg.sendData(JSON.stringify(formData));
+
+                // Имитируем задержку для показа загрузки
                 setTimeout(() => {
                     tg.close();
                 }, 500);
             } catch (error) {
                 console.error('Ошибка отправки данных:', error);
-                showError('Ошибка отправки данных: ' + error.message);
+                showError('Ошибка отправки данных. Попробуйте еще раз.');
+
+                // Скрываем загрузку
                 loading.classList.remove('show');
                 btnText.textContent = 'Запустить парсинг';
                 submitBtn.disabled = false;
             }
         });
 
+        // Инициализация предпросмотра
         updatePreview();
-        console.log("Telegram WebApp:", window.Telegram?.WebApp);
-        console.log("WebApp ready:", tg.isExpanded, tg.initData);
 
+        // Настройка темы под Telegram
+        if (tg.colorScheme === 'dark') {
+            document.body.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
+        }
+
+        // Настройка главной кнопки Telegram (опционально)
         tg.MainButton.setText('Запустить парсинг');
         tg.MainButton.show();
+
         tg.MainButton.onClick(() => {
-            console.log("MainButton нажата");
             form.dispatchEvent(new Event('submit'));
         });
 
+        // Обработчик закрытия приложения
         tg.onEvent('backButtonClicked', () => {
-            console.log("BackButton нажата");
             tg.close();
+        });
+
+        // Анимация появления элементов
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.form-group, .info-card, .preview').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
         });
     </script>
 </body>
