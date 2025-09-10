@@ -3,50 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест Web App</title>
+    <title>Парсинг Wildberries</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background: #f0f0f0;
-        }
-        .main, .test-form {
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
             padding: 20px;
-            border-radius: 10px;
+            display: flex;
+            justify-content: center;
         }
-        .test-form {
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mode-info {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .field {
             display: none;
         }
-        .f-btn, .s-btn, .submit-btn {
-            padding: 10px 20px;
-            margin: 10px;
+
+        .field.show {
+            display: block;
+        }
+
+        .submit-btn {
+            position: relative;
+            width: 100%;
+            padding: 12px;
             background: #667eea;
             color: white;
             border: none;
             border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
+            transition: background 0.3s;
         }
-        .error {
-            color: red;
+
+        .submit-btn:hover {
+            background: #5a67d8;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
             display: none;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        .error {
+            color: #e3342f;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            text-align: center;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .preview {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .preview h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .preview-row span:first-child {
+            color: #555;
+        }
+
+        .preview-row span:last-child {
+            color: #333;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <div class="main">
-        <h2>Тест Web App</h2>
-        <button class="f-btn">Открыть форму</button>
-    </div>
-    <div class="test-form">
-        <h2>Тестовая форма</h2>
-        <input type="text" id="testInput" placeholder="Введите текст">
-        <button class="submit-btn">Отправить</button>
-        <button class="s-btn">Закрыть</button>
-        <div class="error" id="errorMessage"></div>
+    <div class="container">
+        <h1>Парсинг Wildberries</h1>
+        <form id="parsingForm">
+            <div class="form-group">
+                <label for="sessionName">Название сессии</label>
+                <input type="text" id="sessionName" placeholder="Введите название сессии" required>
+            </div>
+            <div class="form-group">
+                <label>Режим парсинга</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="mode" id="mode1" value="1" checked>
+                        Главная страница
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" id="mode2" value="2">
+                        Поиск по запросу
+                    </label>
+                </div>
+                <div class="mode-info" id="modeInfo">
+                    Парсинг товаров с главной страницы Wildberries с заданным количеством прокруток.
+                </div>
+            </div>
+            <div class="form-group field" id="searchField">
+                <label for="searchQuery">Поисковый запрос</label>
+                <input type="text" id="searchQuery" placeholder="Введите запрос">
+            </div>
+            <div class="form-group field show" id="scrollsField">
+                <label for="scrolls">Количество прокруток (1-50)</label>
+                <input type="number" id="scrolls" min="1" max="50" value="1">
+            </div>
+            <div class="form-group field" id="pagesField">
+                <label for="pages">Количество страниц (1-20)</label>
+                <input type="number" id="pages" min="1" max="20" value="1">
+            </div>
+            <div class="form-group">
+                <label for="minReviews">Минимум отзывов (1-10000)</label>
+                <input type="number" id="minReviews" min="1" max="10000" value="1">
+            </div>
+            <button type="submit" id="submitBtn" class="submit-btn">
+                <span id="btnText">Запустить парсинг</span>
+                <span id="loading" class="loading"></span>
+            </button>
+            <div class="error" id="errorMessage"></div>
+        </form>
+        <div class="preview">
+            <h3>Предпросмотр параметров</h3>
+            <div class="preview-row">
+                <span>Режим:</span>
+                <span id="previewMode">Главная страница</span>
+            </div>
+            <div class="preview-row" id="previewQueryRow" style="display: none;">
+                <span>Запрос:</span>
+                <span id="previewQuery">-</span>
+            </div>
+            <div class="preview-row" id="previewScrollsRow">
+                <span>Прокрутки:</span>
+                <span id="previewScrolls">1</span>
+            </div>
+            <div class="preview-row" id="previewPagesRow" style="display: none;">
+                <span>Страницы:</span>
+                <span id="previewPages">1</span>
+            </div>
+            <div class="preview-row">
+                <span>Мин. отзывов:</span>
+                <span id="previewReviews">1</span>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -54,51 +247,181 @@
         tg.expand();
         tg.ready();
 
-        let fBtn = document.getElementsByClassName("f-btn")[0];
-        let sBtn = document.getElementsByClassName("s-btn")[0];
-        let submitBtn = document.getElementsByClassName("submit-btn")[0];
-        let errorMessage = document.getElementById("errorMessage");
+        const form = document.getElementById('parsingForm');
+        const mode1 = document.getElementById('mode1');
+        const mode2 = document.getElementById('mode2');
+        const searchField = document.getElementById('searchField');
+        const scrollsField = document.getElementById('scrollsField');
+        const pagesField = document.getElementById('pagesField');
+        const modeInfo = document.getElementById('modeInfo');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const btnText = document.getElementById('btnText');
+        const errorMessage = document.getElementById('errorMessage');
 
-        fBtn.addEventListener("click", () => {
-            console.log("Кнопка 'Открыть форму' нажата");
-            document.getElementsByClassName("main")[0].style.display = "none";
-            document.getElementsByClassName("test-form")[0].style.display = "block";
+        const previewMode = document.getElementById('previewMode');
+        const previewQuery = document.getElementById('previewQuery');
+        const previewScrolls = document.getElementById('previewScrolls');
+        const previewPages = document.getElementById('previewPages');
+        const previewReviews = document.getElementById('previewReviews');
+        const previewQueryRow = document.getElementById('previewQueryRow');
+        const previewScrollsRow = document.getElementById('previewScrollsRow');
+        const previewPagesRow = document.getElementById('previewPagesRow');
+
+        mode1.addEventListener('change', function() {
+            console.log("Выбран режим: Главная страница");
+            if (this.checked) {
+                searchField.classList.remove('show');
+                pagesField.classList.remove('show');
+                scrollsField.classList.add('show');
+                modeInfo.textContent = 'Парсинг товаров с главной страницы Wildberries с заданным количеством прокруток.';
+                updatePreview();
+            }
         });
 
-        sBtn.addEventListener("click", () => {
-            console.log("Кнопка 'Закрыть' нажата");
-            tg.close();
+        mode2.addEventListener('change', function() {
+            console.log("Выбран режим: Поиск по запросу");
+            if (this.checked) {
+                searchField.classList.add('show');
+                pagesField.classList.add('show');
+                scrollsField.classList.remove('show');
+                modeInfo.textContent = 'Парсинг товаров по поисковому запросу с переходом по страницам результатов.';
+                updatePreview();
+            }
         });
 
-        submitBtn.addEventListener("click", () => {
-            console.log("Кнопка 'Отправить' нажата");
-            const testData = {
-                test_input: document.getElementById("testInput").value.trim() || "тест"
+        document.getElementById('sessionName').addEventListener('input', updatePreview);
+        document.getElementById('searchQuery').addEventListener('input', updatePreview);
+        document.getElementById('scrolls').addEventListener('input', updatePreview);
+        document.getElementById('pages').addEventListener('input', updatePreview);
+        document.getElementById('minReviews').addEventListener('input', updatePreview);
+
+        function updatePreview() {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const sessionName = document.getElementById('sessionName').value;
+            const searchQuery = document.getElementById('searchQuery').value;
+            const scrolls = document.getElementById('scrolls').value;
+            const pages = document.getElementById('pages').value;
+            const minReviews = document.getElementById('minReviews').value;
+
+            console.log("Обновление предпросмотра:", { mode, sessionName, searchQuery, scrolls, pages, minReviews });
+
+            if (mode === '1') {
+                previewMode.textContent = 'Главная страница';
+                previewQueryRow.style.display = 'none';
+                previewScrollsRow.style.display = 'flex';
+                previewPagesRow.style.display = 'none';
+                previewScrolls.textContent = scrolls || '-';
+            } else {
+                previewMode.textContent = 'Поиск по запросу';
+                previewQueryRow.style.display = 'flex';
+                previewScrollsRow.style.display = 'none';
+                previewPagesRow.style.display = 'flex';
+                previewQuery.textContent = searchQuery || '-';
+                previewPages.textContent = pages || '-';
+            }
+            previewReviews.textContent = minReviews || '-';
+        }
+
+        function showError(message) {
+            console.log('Ошибка:', message);
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        function validateForm() {
+            const sessionName = document.getElementById('sessionName').value.trim();
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const searchQuery = document.getElementById('searchQuery').value.trim();
+            const scrolls = parseInt(document.getElementById('scrolls').value);
+            const pages = parseInt(document.getElementById('pages').value);
+            const minReviews = parseInt(document.getElementById('minReviews').value);
+
+            console.log("Валидация формы:", { sessionName, mode, searchQuery, scrolls, pages, minReviews });
+
+            if (!sessionName) {
+                showError('Укажите название сессии');
+                return false;
+            }
+            if (mode === '2' && !searchQuery) {
+                showError('Для режима поиска укажите поисковый запрос');
+                return false;
+            }
+            if (mode === '1' && (scrolls < 1 || scrolls > 50)) {
+                showError('Количество прокруток должно быть от 1 до 50');
+                return false;
+            }
+            if (mode === '2' && (pages < 1 || pages > 20)) {
+                showError('Количество страниц должно быть от 1 до 20');
+                return false;
+            }
+            if (minReviews < 1 || minReviews > 10000) {
+                showError('Минимум отзывов должно быть от 1 до 10000');
+                return false;
+            }
+            return true;
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Форма отправлена');
+            if (!validateForm()) {
+                console.log('Валидация не пройдена');
+                return;
+            }
+            const formData = {
+                session_name: document.getElementById('sessionName').value.trim(),
+                mode: parseInt(document.querySelector('input[name="mode"]:checked').value),
+                search_query: document.getElementById('searchQuery').value.trim(),
+                scrolls: parseInt(document.getElementById('scrolls').value),
+                pages: parseInt(document.getElementById('pages').value),
+                min_reviews: parseInt(document.getElementById('minReviews').value)
             };
-            console.log("Отправляемые данные:", testData);
+            console.log('Отправляемые данные:', formData);
+            console.log('Telegram WebApp:', window.Telegram?.WebApp);
+            if (!window.Telegram?.WebApp) {
+                console.error('Telegram WebApp не инициализирован');
+                showError('Ошибка: Telegram Web App не инициализирован');
+                return;
+            }
             try {
-                if (!window.Telegram?.WebApp) {
-                    console.error("Telegram WebApp не инициализирован");
-                    errorMessage.textContent = "Ошибка: Telegram Web App не инициализирован";
-                    errorMessage.style.display = "block";
-                    return;
-                }
-                const jsonData = JSON.stringify(testData);
-                console.log("JSON для отправки:", jsonData);
+                const jsonData = JSON.stringify(formData);
+                console.log('JSON для отправки:', jsonData);
                 tg.sendData(jsonData);
-                console.log("Данные успешно отправлены в Telegram");
+                console.log('Данные успешно отправлены в Telegram');
+                loading.classList.add('show');
+                btnText.textContent = 'Отправка...';
+                submitBtn.disabled = true;
                 setTimeout(() => {
                     tg.close();
                 }, 500);
             } catch (error) {
-                console.error("Ошибка отправки данных:", error);
-                errorMessage.textContent = "Ошибка отправки данных: " + error.message;
-                errorMessage.style.display = "block";
+                console.error('Ошибка отправки данных:', error);
+                showError('Ошибка отправки данных: ' + error.message);
+                loading.classList.remove('show');
+                btnText.textContent = 'Запустить парсинг';
+                submitBtn.disabled = false;
             }
         });
 
+        updatePreview();
         console.log("Telegram WebApp:", window.Telegram?.WebApp);
         console.log("WebApp ready:", tg.isExpanded, tg.initData);
+
+        tg.MainButton.setText('Запустить парсинг');
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => {
+            console.log("MainButton нажата");
+            form.dispatchEvent(new Event('submit'));
+        });
+
+        tg.onEvent('backButtonClicked', () => {
+            console.log("BackButton нажата");
+            tg.close();
+        });
     </script>
 </body>
 </html>
